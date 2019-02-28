@@ -7,7 +7,7 @@
   
   Each constructor function has unique properties and methods that are defined in their block comments below:
 */
-  
+
 /*
   === GameObject ===
   * createdAt
@@ -16,31 +16,34 @@
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
 
-function GameObject(player){
+const damageDealt = [0, 25, 50, 75]
+
+class GameObject{
+  constructor(player){
   this.createdAt = player.createdAt;
   this.name = player.name;
   this.dimensions = player.dimensions;
+  }
+  destroy() {
+  return `${this.name} was removed from the game.`;
+  }
 }
 
-GameObject.prototype.destroy = function() {
-  return `${this.name} was removed from the game.`;
-}
+
 /*
   === CharacterStats ===
   * healthPoints
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
-
-function CharacterStats(stats){
-  this.healthPoints = stats.healthPoints;
-  GameObject.call(this,stats);
-}
-
-CharacterStats.prototype = Object.create(GameObject.prototype);
-
-CharacterStats.prototype.takeDamage = function() {
-  return `${this.name} took damage.`;
+class CharacterStats extends GameObject{
+  constructor(stats){
+    super(stats);
+    this.healthPoints = stats.healthPoints;
+  }
+  takeDamage() {
+    return `${this.name} took damage.`;
+  }
 }
 
 
@@ -53,47 +56,60 @@ CharacterStats.prototype.takeDamage = function() {
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
-
-function Humanoid(attributes){
-  this.team = attributes.team;
-  this.weapons = attributes.weapons;
-  this.language = attributes.language;
-  CharacterStats.call(this,attributes);
+class Humanoid extends CharacterStats{
+  constructor(attributes){
+    super(attributes);
+    this.team = attributes.team;
+    this.weapons = attributes.weapons;
+    this.language = attributes.language
+  }
+  greet() {
+    return `${this.name} offers a greeting in ${this.language}.`;
+  }
+  
+  spank(Humanoid1, Humanoid2) {
+  
+    var spanky = damageDealt[Math.floor(Math.random() * damageDealt.length)];
+    console.log(Humanoid1.name + " spanks " + Humanoid2.name + ' with a hit of :' + spanky);
+    Humanoid2.healthPoints = Humanoid2.healthPoints - spanky;
+    if (Humanoid2.healthPoints <= 0) {
+      console.log(Humanoid2.name + ' died sucka');
+    }else{
+    
+      console.log(Humanoid2.name + ' says, "im still breathin boiiii" HP: ' + Humanoid2.healthPoints)
+    
+    }
+  }
 }
 
-Humanoid.prototype = Object.create(CharacterStats.prototype);
-
-Humanoid.prototype.greet = function() {
-  return `${this.name} offers a greeting in ${this.language}.`;
-}
 
 //hero
-function Hero(abilities){
-  this.specialMove = abilities.specialMove;
-  this.speedPotion = abilities.speedPotion;
-  Humanoid.call(this,abilities);
+class Hero extends Humanoid{
+  constructor(abilities){
+    super(abilities);
+    this.specialMove = abilities.specialMove;
+    this.speedPotion = abilities.speedPotion;
+  }
+  attack() {
+    return `${this.name} deals ${this.specialMove} damage to enemy!`;
+  }
+  
+  speedpotion() {
+    return `${this.name} used a ${this.speedPotion}!`;
+  }
 }
 
-Hero.prototype = Object.create(Humanoid.prototype);
 
-Hero.prototype.attack = function() {
-  return `${this.name} deals ${this.specialMove} damage to enemy!`;
-}
-
-Hero.prototype.speedpotion = function() {
-  return `${this.name} used a ${this.speedPotion}!`;
-}
 
 //villian
-function Villain(abilities){
-  this.specialMove = abilities.specialMove;
-  Humanoid.call(this,abilities);
-}
-
-Villain.prototype = Object.create(Humanoid.prototype);
-
-Villain.prototype.attack = function() {
-  return `${this.name} deals ${this.specialMove} damage to Challenger!`;
+class Villain extends Humanoid{
+  constructor(abilities){
+    super(abilities);
+    this.specialMove = abilities.specialMove;
+  }
+  attack() {
+    return `${this.name} deals ${this.specialMove} damage to Challenger!`;
+  }
 }
 
 
@@ -113,7 +129,7 @@ const mage = new Humanoid({
     width: 1,
     height: 1,
   },
-  healthPoints: 5,
+  healthPoints: 100,
   name: 'Bruce',
   team: 'Mage Guild',
   weapons: [
@@ -129,7 +145,7 @@ const swordsman = new Humanoid({
     width: 2,
     height: 2,
   },
-  healthPoints: 15,
+  healthPoints: 100,
   name: 'Sir Mustachio',
   team: 'The Round Table',
   weapons: [
@@ -146,7 +162,7 @@ const archer = new Humanoid({
     width: 2,
     height: 4,
   },
-  healthPoints: 10,
+  healthPoints: 100,
   name: 'Lilith',
   team: 'Forest Kingdom',
   weapons: [
@@ -163,7 +179,7 @@ const hero = new Hero({
     width: 2,
     height: 3,
   },
-  healthPoints: 35,
+  healthPoints: 100,
   name: 'Biondi',
   team: 'The Round Table',
   weapons: [
@@ -182,7 +198,7 @@ const villain = new Villain({
     width: 4,
     height: 6,
   },
-  healthPoints: 50,
+  healthPoints: 100,
   name: 'Josh Knell',
   team: 'Lamdba',
   weapons: [
@@ -210,24 +226,38 @@ console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
 // * Create two new objects, one a villain and one a hero and fight it out with methods!
 
+console.log("---------------------------")
+
+while(villain.healthPoints > 0 && hero.healthPoints > 0){
+  if (villain.healthPoints > 0 && hero.healthPoints > 0){
+      villain.spank(villain,hero);
+  }
+  if (villain.healthPoints > 0 && hero.healthPoints > 0){
+      hero.spank(hero,villain);
+  }
+}
 
 
-console.log(hero.createdAt); 
+console.log("---------------------------")
+
+console.log(hero.createdAt);
 console.log(hero.dimensions);
 console.log(hero.healthPoints);
-console.log(hero.name); 
+console.log(hero.name);
 console.log(hero.team);
 console.log(hero.weapons);
 console.log(hero.language);
 
-console.log(villain.createdAt); 
+console.log(villain.createdAt);
 console.log(villain.dimensions);
 console.log(villain.healthPoints);
-console.log(villain.name); 
+console.log(villain.name);
 console.log(villain.team);
 console.log(villain.weapons);
 console.log(villain.language);
 
+console.log("From before time. when unicorns reigned free. The fight begins that changes everyones past.")
+console.log("Battle!!!")
 console.log(villain.greet());
 console.log(hero.greet());
 
